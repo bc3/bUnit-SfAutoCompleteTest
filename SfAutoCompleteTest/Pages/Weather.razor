@@ -1,0 +1,40 @@
+@using SfAutoCompleteTest.Data
+
+@if (forecast != null)
+{
+    <h3>
+        <span>@forecast.Summary</span>
+    </h3>
+    <h5><span>@forecast.TemperatureC / @forecast.TemperatureF</span></h5>
+}
+else
+{
+    <h3>
+        <span>Choose data</span>
+    </h3>
+}
+
+
+<hr/>
+
+<pre>Type in 'Boom' to get the temperature in Boom</pre>
+
+<SfAutoComplete TValue="string" TItem="WeatherForecast">
+    <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
+    <AutoCompleteFieldSettings Value="Summary"></AutoCompleteFieldSettings>
+    <AutoCompleteEvents TValue="string" TItem="WeatherForecast" ValueChange="OnValueChanged"></AutoCompleteEvents>
+</SfAutoComplete>
+
+
+@code {
+    
+    [Parameter] public EventCallback<WeatherForecast> WeatherForecastChanged { get; set; }
+    
+    private async Task OnValueChanged(ChangeEventArgs<string, WeatherForecast> obj)
+    {
+        this.forecast = obj.ItemData;
+        await WeatherForecastChanged.InvokeAsync(obj.ItemData);
+    }
+
+    private WeatherForecast forecast;
+}
