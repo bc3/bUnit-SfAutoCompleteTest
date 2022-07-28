@@ -19,7 +19,7 @@ public class CustomAdaptor : DataAdaptor
     {
         var searchValue = dm.Where[0].value.ToString();
 
-        if (searchValue != null && searchValue.Length > 2)
+        if (searchValue != null && searchValue.Length >= 2)
         {
             IEnumerable<WeatherForecast> DataSource = order;
             if (dm.Search != null && dm.Search.Count > 0)
