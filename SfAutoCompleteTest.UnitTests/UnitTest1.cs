@@ -28,7 +28,7 @@ public class Tests
     }
     
     [Test]
-    public void Index_SearchBoomDirect_ExpectData()
+    public async Task Index_SearchBoomDirect_ExpectData()
     {
       
             using var ctx = new Bunit.TestContext();
@@ -44,13 +44,29 @@ public class Tests
                 });
             });
 
-            var autocomplete = cut.FindComponent<SfAutoComplete<string, WeatherForecast>>();
-
-            var input = autocomplete.Find("input.e-autocomplete");
-            input.Change("Boom");
-            input.KeyUp(Key.Enter);            
+            var dropdown = cut.FindComponent<SfAutoComplete<string, WeatherForecast>>();
+            var index = 1;
+            var containerEle = dropdown.Find("input").ParentElement;
+            await dropdown.Instance.ShowPopup();
+            var popupEle = dropdown.Find(".e-popup");
+            var liColl = popupEle.QuerySelectorAll("li.e-list-item");
+            liColl[index].Click();
+            liColl = popupEle.QuerySelectorAll("li.e-list-item");
+            Assert.Contains("e-active", liColl[index].ClassName.Split(" "));
+            var focusItem = popupEle.QuerySelector("li.e-item-focus");
+            Assert.Null(focusItem);
+            await dropdown.Instance.HidePopup();
+            // dropdown.SetParametersAndRender(("Value", "AU"));
+            // await Task.Delay(200);
+            var inputEle = dropdown.Find("input");
+            Assert.AreEqual(index, dropdown.Instance.Index);
+            // dropdown.SetParametersAndRender(("ShowClearButton", true));
+            // containerEle = dropdown.Find("input").ParentElement;
+            // var clearEle = containerEle.Children[1];
+            // Assert.AreEqual("e-clear-icon", clearEle.ClassName);
+            // clearEle.MouseDown();       
             
-            Assert.AreEqual(autocomplete.Instance.Value, "Boom");
+            Assert.AreEqual(dropdown.Instance.Value, "Belgium - Boom");
             
     }
     

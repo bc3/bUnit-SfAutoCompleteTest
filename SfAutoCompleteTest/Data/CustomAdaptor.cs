@@ -17,33 +17,40 @@ public class CustomAdaptor : DataAdaptor
 
     public override object Read(DataManagerRequest dm, string key = null)
     {
-        IEnumerable<WeatherForecast> DataSource = order;
-        if (dm.Search != null && dm.Search.Count > 0)
+        var searchValue = dm.Where[0].value.ToString();
+
+        if (searchValue != null && searchValue.Length > 2)
         {
-            DataSource = DataOperations.PerformSearching(DataSource, dm.Search); //Search
+            IEnumerable<WeatherForecast> DataSource = order;
+            if (dm.Search != null && dm.Search.Count > 0)
+            {
+                DataSource = DataOperations.PerformSearching(DataSource, dm.Search); //Search
+            }
+
+            if (dm.Sorted != null && dm.Sorted.Count > 0) //Sorting
+            {
+                DataSource = DataOperations.PerformSorting(DataSource, dm.Sorted);
+            }
+
+            if (dm.Where != null && dm.Where.Count > 0) //Filtering
+            {
+                DataSource = DataOperations.PerformFiltering(DataSource, dm.Where, dm.Where[0].Operator);
+            }
+
+            int count = DataSource.Cast<WeatherForecast>().Count();
+            if (dm.Skip != 0)
+            {
+                DataSource = DataOperations.PerformSkip(DataSource, dm.Skip); //Paging
+            }
+
+            if (dm.Take != 0)
+            {
+                DataSource = DataOperations.PerformTake(DataSource, dm.Take);
+            }
+
+            return dm.RequiresCounts ? new DataResult() { Result = DataSource, Count = count } : (object)DataSource;
         }
 
-        if (dm.Sorted != null && dm.Sorted.Count > 0) //Sorting
-        {
-            DataSource = DataOperations.PerformSorting(DataSource, dm.Sorted);
-        }
-
-        if (dm.Where != null && dm.Where.Count > 0) //Filtering
-        {
-            DataSource = DataOperations.PerformFiltering(DataSource, dm.Where, dm.Where[0].Operator);
-        }
-
-        int count = DataSource.Cast<WeatherForecast>().Count();
-        if (dm.Skip != 0)
-        {
-            DataSource = DataOperations.PerformSkip(DataSource, dm.Skip); //Paging
-        }
-
-        if (dm.Take != 0)
-        {
-            DataSource = DataOperations.PerformTake(DataSource, dm.Take);
-        }
-
-        return dm.RequiresCounts ? new DataResult() { Result = DataSource, Count = count } : (object)DataSource;
+        return new DataResult();
     }
 }
