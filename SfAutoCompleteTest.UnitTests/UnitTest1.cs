@@ -1,8 +1,11 @@
 using Bunit;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using SfAutoCompleteTest.Data;
 using SfAutoCompleteTest.Pages;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.DropDowns;
+using Index = SfAutoCompleteTest.Pages.Index;
 
 namespace SfAutoCompleteTest.UnitTests;
 
@@ -27,8 +30,15 @@ public class Tests
                           "<span diff:ignoreChildren diff:ignoreAttributes></span>");
     }
     
-    [Test]
-    public async Task Index_SearchBoomDirect_ExpectData()
+    [TestCase(0, CustomAdaptor.BelgiumBoom, "Boom" , 1)]
+    [TestCase(0,  CustomAdaptor.BelgiumBoortmeerbeek , "Boor", 1)] 
+    [TestCase(0, CustomAdaptor.BelgiumBorgloon, "Borg", 1)] 
+    [TestCase(0, CustomAdaptor.BelgiumBoom, "Bo", 3)] 
+    [TestCase(2, CustomAdaptor.BelgiumBoortmeerbeek, "Bo", 3)] 
+    [TestCase(1, CustomAdaptor.BelgiumBorgloon, "Bo", 3)] 
+    [TestCase(0, CustomAdaptor.BelgiumBoom, "Boo", 2)] 
+    [TestCase(1, CustomAdaptor.BelgiumBoortmeerbeek, "Boo", 2)] 
+    public async Task Index_SearchBoomDirect_ExpectData(int index, string value, string searchText, int count)
     {
       
             using var ctx = new Bunit.TestContext();
@@ -39,34 +49,26 @@ public class Tests
                 parameters.Add(p => p.WeatherForecastChanged, (x) =>
                 {
                     
-                    Assert.AreEqual(x.Summary, CustomAdaptor.BelgiumBoom);
-                    Assert.AreEqual(x.TemperatureC, 35);
+                    Assert.AreEqual(x.Summary, value);
                 });
             });
 
             var dropdown = cut.FindComponent<SfAutoComplete<string, WeatherForecast>>();
-            var index = 1;
-            var containerEle = dropdown.Find("input").ParentElement;
-            await dropdown.Instance.ShowPopup();
+           
+            var filterInput = dropdown.Find("input");
+            Assert.NotNull(filterInput);
+            KeyboardEventArgs args = new KeyboardEventArgs() { Code = searchText, Key = searchText };
+            filterInput.NodeValue = searchText;
+            filterInput.Input(new ChangeEventArgs() { Value = searchText });
+            filterInput.KeyUp(args);
+            await Task.Delay(100);
             var popupEle = dropdown.Find(".e-popup");
-            var liColl = popupEle.QuerySelectorAll("li.e-list-item");
-            liColl[index].Click();
-            liColl = popupEle.QuerySelectorAll("li.e-list-item");
-            Assert.Contains("e-active", liColl[index].ClassName.Split(" "));
-            var focusItem = popupEle.QuerySelector("li.e-item-focus");
-            Assert.Null(focusItem);
-            await dropdown.Instance.HidePopup();
-            // dropdown.SetParametersAndRender(("Value", "AU"));
-            // await Task.Delay(200);
-            var inputEle = dropdown.Find("input");
-            Assert.AreEqual(index, dropdown.Instance.Index);
-            // dropdown.SetParametersAndRender(("ShowClearButton", true));
-            // containerEle = dropdown.Find("input").ParentElement;
-            // var clearEle = containerEle.Children[1];
-            // Assert.AreEqual("e-clear-icon", clearEle.ClassName);
-            // clearEle.MouseDown();       
+            var liCollection = popupEle.QuerySelectorAll("li.e-list-item");
+            liCollection[index].Click();
+            await Task.Delay(100);
+            Assert.AreEqual(count, liCollection.Length);
             
-            Assert.AreEqual(dropdown.Instance.Value, "Belgium - Boom");
+            Assert.AreEqual(dropdown.Instance.Value, value);
             
     }
     

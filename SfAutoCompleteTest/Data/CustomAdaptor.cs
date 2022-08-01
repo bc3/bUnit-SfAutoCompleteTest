@@ -6,13 +6,16 @@ namespace SfAutoCompleteTest.Data;
 public class CustomAdaptor : DataAdaptor
 {
     public const string BelgiumBoom = "Belgium - Boom";
+    public const string BelgiumBorgloon = "Belgium - Borgloon";
+    public const string BelgiumBoortmeerbeek = "Belgium - Boortmeerbeek";
     
     public static List<WeatherForecast> order = new List<WeatherForecast>()
     {
         new() { Date = DateTime.Today.Date, Summary = "Belgium - Hasselt", TemperatureC = 40},
         new() { Date = DateTime.Today.Date, Summary = BelgiumBoom, TemperatureC = 35 },
         new() { Date = DateTime.Today.Date, Summary = "Belgium - Sint-Truiden", TemperatureC = 32 },
-        new() { Date = DateTime.Today.Date, Summary = "Belgium - Borgloon", TemperatureC = 37 }
+        new() { Date = DateTime.Today.Date, Summary = BelgiumBorgloon, TemperatureC = 37 },
+        new() { Date = DateTime.Today.Date, Summary = BelgiumBoortmeerbeek, TemperatureC = 37 }
     };
 
     public override object Read(DataManagerRequest dm, string key = null)
