@@ -1,7 +1,12 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
 using SfAutoCompleteTest.Data;
+using SfAutoCompleteTest.Database;
 using Syncfusion.Blazor;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +15,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSyncfusionBlazor(options => { options.IgnoreScriptIsolation = true; });
+builder.Services.AddDbContext<WeatherDbContext>(opt =>
+    opt.UseInMemoryDatabase("WeatherForecasts"));
+builder.Services.AddControllers()
+    .AddOData(opt => opt.Select().Filter().OrderBy().SetMaxTop(100).SkipToken().Expand().Count().AddRouteComponents("odata", GetEdmModel()));
 
 var app = builder.Build();
 
@@ -21,6 +30,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
@@ -30,4 +40,13 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
+app.MapControllers();
+
 app.Run();
+
+static IEdmModel GetEdmModel()
+{
+    var builder = new ODataConventionModelBuilder();
+    builder.EntitySet<WeatherForecast>("WeatherForecasts");
+    return builder.GetEdmModel();
+}

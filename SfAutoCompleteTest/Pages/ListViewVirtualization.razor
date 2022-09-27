@@ -1,0 +1,50 @@
+@page "/listviewvirtualization"
+@using SfAutoCompleteTest.Data
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Lists
+
+<SfGrid
+    AllowExcelExport="true"
+    AllowFiltering="true"
+    AllowGrouping="false"
+    AllowPaging="false"
+    AllowReordering="true"
+    AllowResizing="true"
+    AllowSelection="true"
+    AllowSorting="true"
+    ID="contacts_grid"
+    EnableVirtualization="true"
+    EnableVirtualMaskRow="true"
+    Height="300px"
+    ShowColumnChooser="true"
+    Toolbar="@(new List<string>() { "ColumnChooser" })"
+    TValue="WeatherForecast"
+    Width="100%">
+
+
+    <SfDataManager Adaptor="Adaptors.ODataV4Adaptor"
+                   Url="https://localhost:7072/odata/WeatherForecasts"/>
+    <GridColumns>
+
+        <GridColumn Field="@nameof(WeatherForecast.Date)">
+        </GridColumn>
+        <GridColumn Field="@nameof(WeatherForecast.Summary)">
+        </GridColumn>
+        <GridColumn Field="@nameof(WeatherForecast.TemperatureC)">
+        </GridColumn>
+    </GridColumns>
+
+</SfGrid>
+
+<SfListView EnableVirtualization="true" Height="400px" CssClass="e-list-template" HeaderTitle="Test" ShowHeader="true" TValue="WeatherForecast">
+    <SfDataManager Url="https://localhost:7072/odata/WeatherForecasts" Adaptor="Adaptors.ODataV4Adaptor"></SfDataManager>
+    @* <ListViewEvents TValue="InboxDto" OnActionFailure="OnActionFailure" OnActionBegin="ActionBeginEarlier" OnActionComplete="ActionCompleteEarlier"></ListViewEvents> *@
+    <ListViewTemplates TValue="WeatherForecast">
+        <Template>
+            <span>@(context.Date.ToString("d"))</span>
+            <span>@(context.Summary)</span>
+            <span>@(context.TemperatureC)</span>
+        </Template>
+    </ListViewTemplates>
+</SfListView>
