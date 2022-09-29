@@ -1,9 +1,44 @@
 @page "/listviewvirtualization"
 @using SfAutoCompleteTest.Data
-
+@using Microsoft.AspNetCore.SignalR.Client
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Lists
 
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
+@code {
+    private HubConnection? hubConnection;
+    private List<string> messages = new List<string>();
+    private string? userInput;
+    private string? messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/loggerhub"))
+            .Build();
+
+        hubConnection.On<string>("BroadcastMessage", (message) =>
+        {
+            var encodedMsg = $"{message}";
+            messages.Add(encodedMsg);
+            InvokeAsync(StateHasChanged);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        if (hubConnection is not null)
+        {
+             hubConnection.DisposeAsync();
+        }
+    }
+
+}
 <SfGrid
     AllowExcelExport="true"
     AllowFiltering="true"
@@ -48,3 +83,10 @@
         </Template>
     </ListViewTemplates>
 </SfListView>
+
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
